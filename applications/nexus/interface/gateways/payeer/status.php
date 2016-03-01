@@ -26,6 +26,39 @@ $settings = json_decode( $transaction->method->settings, TRUE );
 
 if (isset(\IPS\Request::i()->m_operation_id) && isset(\IPS\Request::i()->m_sign))
 {
+	$arHash = array(
+		\IPS\Request::i()->m_operation_id,
+		\IPS\Request::i()->m_operation_ps,
+		\IPS\Request::i()->m_operation_date,
+		\IPS\Request::i()->m_operation_pay_date,
+		\IPS\Request::i()->m_shop,
+		\IPS\Request::i()->m_orderid,
+		\IPS\Request::i()->m_amount,
+		\IPS\Request::i()->m_curr,
+		\IPS\Request::i()->m_desc,
+		\IPS\Request::i()->m_status,
+		$settings['SecretKey']
+	);
+	
+	$sign_hash = strtoupper(hash('sha256', implode(':', $arHash)));
+	
+	if (\IPS\Request::i()->m_sign != $sign_hash)
+	{
+		if (!empty($settings['EmailError']))
+		{
+			$language = \IPS\Lang::load(\IPS\Lang::defaultLanguage());
+			$subject = $language->get('payeer_email_subject');
+			$message = $language->get('payeer_email_message1') . "\n\n";
+			$message .= $language->get('payeer_email_message2') . "\n";
+
+			$message .= "\n" . $log_text;
+			$headers = "From: no-reply@" . $_SERVER['HTTP_HOST'] . "\r\nContent-type: text/plain; charset=utf-8 \r\n";
+			mail($settings['EmailError'], $subject, $message, $headers);
+		}
+		
+		exit (\IPS\Request::i()->m_orderid . '|error');
+	}
+	
 	// проверка принадлежности ip списку доверенных ip
 
 	$list_ip_str = str_replace(' ', '', $settings['IPFilter']);
@@ -76,23 +109,7 @@ if (isset(\IPS\Request::i()->m_operation_id) && isset(\IPS\Request::i()->m_sign)
 		file_put_contents($_SERVER['DOCUMENT_ROOT'] . $settings['PathLogFile'], $log_text, FILE_APPEND);
 	}
 	
-	$arHash = array(
-		\IPS\Request::i()->m_operation_id,
-		\IPS\Request::i()->m_operation_ps,
-		\IPS\Request::i()->m_operation_date,
-		\IPS\Request::i()->m_operation_pay_date,
-		\IPS\Request::i()->m_shop,
-		\IPS\Request::i()->m_orderid,
-		\IPS\Request::i()->m_amount,
-		\IPS\Request::i()->m_curr,
-		\IPS\Request::i()->m_desc,
-		\IPS\Request::i()->m_status,
-		$settings['SecretKey']
-	);
-	
-	$sign_hash = strtoupper(hash('sha256', implode(':', $arHash)));
-	
-	if (\IPS\Request::i()->m_sign == $sign_hash && \IPS\Request::i()->m_status == 'success' && $valid_ip)
+	if (\IPS\Request::i()->m_status == 'success' && $valid_ip)
 	{
 		try
 		{					
@@ -122,11 +139,6 @@ if (isset(\IPS\Request::i()->m_operation_id) && isset(\IPS\Request::i()->m_sign)
 			$language = \IPS\Lang::load(\IPS\Lang::defaultLanguage());
 			$subject = $language->get('payeer_email_subject');
 			$message = $language->get('payeer_email_message1') . "\n\n";
-			
-			if (\IPS\Request::i()->m_sign != $sign_hash)
-			{
-				$message .= $language->get('payeer_email_message2') . "\n";
-			}
 			
 			if (\IPS\Request::i()->m_status != "success")
 			{
