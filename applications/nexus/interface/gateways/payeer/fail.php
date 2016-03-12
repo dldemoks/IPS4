@@ -1,7 +1,7 @@
 <?php
 /**
  * @brief		Payeer Gateway
- * @author		<a href='http://www.payeer.com'>Payeer</a>
+ * @author		<a href='https://payeer.com'>Payeer</a>
  * @version		SVN_VERSION_NUMBER
  */
 
