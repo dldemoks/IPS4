@@ -31,7 +31,7 @@ class _Payeer extends \IPS\nexus\Gateway
 		
 		$m_shop = $settings['MerchantID'];
 		$m_orderid = $transaction->id;
-		$m_amount = number_format($transaction->amount->amount, 2, '.', '');
+		$m_amount = number_format((string)$transaction->amount->amount, 2, '.', '');
 		$m_curr = $transaction->amount->currency == 'RUR' ? 'RUB' : $transaction->amount->currency;
 		$m_desc = base64_encode($transaction->invoice->title);
 
