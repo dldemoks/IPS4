@@ -1,7 +1,7 @@
 Invision Power Suite 4
 ======
-Модуль оплаты Payeer
+Payment module Payeer
 
-Для установки модуля следуйте прилагаемой инструкции Payeer (IPS4).pdf
+To install the module follow the attached instructions Payeer (IPS4).pdf
 
-Поддерживается версия CMS Invision Power Suite 4
+Support for CMS Invision Power Suite 4
